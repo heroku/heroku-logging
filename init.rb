@@ -38,4 +38,6 @@ module Heroku::Command
 
     def init
       puts heroku.post("/apps/#{app}/logplex", {}).to_s
+    end
+  end
 end
