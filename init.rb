@@ -1,7 +1,6 @@
 class Heroku::Client
   def read_logplex(app_name, options)
     query = "?" + options.join("&") unless options.empty?
-    puts "/apps/#{app_name}/logplex#{query}"
     url = get("/apps/#{app_name}/logplex#{query}").to_s
     uri  = URI.parse(url);
     http = Net::HTTP.new(uri.host, uri.port)
