@@ -14,6 +14,14 @@ class Heroku::Client
       end
     end
   end
+
+  def logplex_add(app_name, options = {})
+    puts post("/apps/#{app_name}/logplex", options).to_s
+  end
+
+  def logplex_remove(app_name, options = {})
+    puts delete("/apps/#{app_name}/logplex", options).to_s
+  end
 end
 
 module Heroku::Command
@@ -25,6 +33,14 @@ module Heroku::Command
 
     def tail
       heroku.logplex(app)
+    end
+
+    def add
+      heroku.logplex_add(app)
+    end
+
+    def remove
+      heroku.logplex_remove(app)
     end
   end
 end
