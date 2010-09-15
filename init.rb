@@ -13,7 +13,7 @@ class Heroku::Client
     http.start do
       http.request_get(uri.path) do |request|
         request.read_body do |chunk|
-          puts chunk
+          yield chunk
         end
       end
     end
@@ -41,7 +41,9 @@ module Heroku::Command
           when "-s", "--source" then options << "source=#{URI.encode(args.shift)}"
           end
       end
-      heroku.read_logplex(app, options)
+      heroku.read_logplex(app, options) do |chk|
+        puts chk
+      end
     end
 
     def disable
