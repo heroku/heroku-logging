@@ -19,7 +19,7 @@ class Heroku::Client
     end
   end
 
-  def init_logplex(app_name)
+  def enable_logplex(app_name)
     post("/apps/#{app_name}/logplex", {}).to_s
   end
 
@@ -48,8 +48,8 @@ module Heroku::Command
       puts heroku.disable_logplex(app)
     end
 
-    def init
-      puts heroku.init_logplex(app)
+    def enable
+      puts heroku.enable_logplex(app)
     end
   end
 end
