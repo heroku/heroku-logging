@@ -4,7 +4,12 @@ class Heroku::Client
     url = get("/apps/#{app_name}/logplex#{query}").to_s
     uri  = URI.parse(url);
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true if uri.scheme == "https"
+
+    if uri.scheme == 'https'
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+
     http.start do
       http.request_get(uri.path) do |request|
         request.read_body do |chunk|
