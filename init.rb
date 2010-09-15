@@ -18,6 +18,14 @@ class Heroku::Client
       end
     end
   end
+
+  def init_logplex(app_name)
+    post("/apps/#{app_name}/logplex", {}).to_s
+  end
+
+  def disable_logplex(app_name)
+     delete("/apps/#{app_name}/logplex", {}).to_s
+  end
 end
 
 module Heroku::Command
@@ -37,11 +45,11 @@ module Heroku::Command
     end
 
     def disable
-      puts heroku.delete("/apps/#{app}/logplex", {}).to_s
+      puts heroku.disable_logplex(app)
     end
 
     def init
-      puts heroku.post("/apps/#{app}/logplex", {}).to_s
+      puts heroku.init_logplex(app)
     end
   end
 end
