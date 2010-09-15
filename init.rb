@@ -30,6 +30,12 @@ end
 
 module Heroku::Command
   class Logplex < BaseWithApp
+    Help.group("logplex") do |group|
+      group.command "logplex:enable",    "enable logplex service"
+      group.command "logplex:disable",   "disable logplex service"
+      group.command "logplex [options]", "show logplex logs"
+    end
+
     def index
       ## make this do something other than tail?
       options = []
