@@ -34,16 +34,16 @@ module Heroku::Command
       group.command "logplex:enable",    "enable logplex service"
       group.command "logplex:disable",   "disable logplex service"
       group.command "logplex [options]", "show logplex logs"
+      group.command "logplex --tail",    "realtime tail of logplex logs"
     end
 
     def index
-      ## make this do something other than tail?
       options = []
       until args.empty? do
         case args.shift
           when "-t", "--tail"   then options << "tail=1"
           when "-n", "--num"    then options << "num=#{args.shift.to_i}"
-          when "-p", "--pid"    then options << "pid=#{URI.encode(args.shift)}"
+          when "-p", "--ps"     then options << "ps=#{URI.encode(args.shift)}"
           when "-s", "--source" then options << "source=#{URI.encode(args.shift)}"
           end
       end
