@@ -26,6 +26,14 @@ class Heroku::Client
   def disable_logplex(app_name)
      delete("/apps/#{app_name}/logplex", {}).to_s
   end
+
+  def add_drain(app_name, options=[])
+    post("/apps/#{app_name}/logplex/drains", options.join("&")).to_s
+  end
+
+  def remove_drain(app_name, drain_name)
+    delete("/apps/#{app_name}/logplex/drains/#{drain_name}", {}).to_s
+  end
 end
 
 module Heroku::Command
@@ -35,6 +43,8 @@ module Heroku::Command
       group.command "logplex:disable",   "disable logplex service"
       group.command "logplex [options]", "show logplex logs"
       group.command "logplex --tail",    "realtime tail of logplex logs"
+      group.command "logplex:drain add [options]", "add an instance that will receive log messages"
+      group.command "logplex:drain remove [options]", "remove an instance"
     end
 
     def index
@@ -59,5 +69,32 @@ module Heroku::Command
     def enable
       puts heroku.enable_logplex(app)
     end
+
+    def drain
+      case args.shift
+        when "add"
+          options = []
+          until args.empty? do
+            case args.shift
+              when "-n", "--name"   then options << "name=#{URI.encode(args.shift)}"
+              when "-h", "--host"    then options << "host=#{URI.encode(args.shift)}"
+              when "-p", "--port"     then options << "port=#{args.shift.to_i}"
+              end
+          end
+          puts heroku.add_drain(app, options)
+          return
+        when "remove"
+          until args.empty? do
+            case args.shift
+              when "-n", "--name"
+                name = URI.encode(args.shift)
+                puts heroku.remove_drain(app, name)
+                return
+              end
+          end
+      end
+      puts "Unknown or malformed drain command"
+    end
+
   end
 end
