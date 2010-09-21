@@ -27,8 +27,8 @@ class Heroku::Client
      delete("/apps/#{app_name}/logplex", {}).to_s
   end
 
-  def add_drain(app_name, options=[])
-    post("/apps/#{app_name}/logplex/drains", options.join("&")).to_s
+  def add_drain(app_name, body)
+    post("/apps/#{app_name}/logplex/drains", body).to_s
   end
 
   def remove_drain(app_name, drain_name)
@@ -73,15 +73,19 @@ module Heroku::Command
     def drain
       case args.shift
         when "add"
-          options = []
+          name = host = port = nil
           until args.empty? do
             case args.shift
-              when "-n", "--name"   then options << "name=#{URI.encode(args.shift)}"
-              when "-h", "--host"    then options << "host=#{URI.encode(args.shift)}"
-              when "-p", "--port"     then options << "port=#{args.shift.to_i}"
+              when "-n", "--name" then name = URI.encode(args.shift)
+              when "-h", "--host" then host = URI.encode(args.shift)
+              when "-p", "--port" then port = args.shift.to_i
               end
           end
-          puts heroku.add_drain(app, options)
+          if name.nil? || host.nil? || port.nil?
+            puts "Usage:\theroku logplex:drain add --name <name> --host <host> --port <port>"
+          else
+            puts heroku.add_drain(app, "name=#{name}&host=#{host}&port=#{port}")
+          end
           return
         when "remove"
           until args.empty? do
@@ -92,6 +96,8 @@ module Heroku::Command
                 return
               end
           end
+          puts "Usage:\theroku logplex:drain remove --name <name>"
+          return
       end
       puts "Unknown or malformed drain command"
     end
