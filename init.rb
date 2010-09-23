@@ -27,6 +27,10 @@ class Heroku::Client
      delete("/apps/#{app_name}/logplex", {}).to_s
   end
 
+  def logplex_info(app_name)
+    get("/apps/#{app_name}/logplex/info").to_s.gsub(/^\s*$/, '')
+  end
+
   def add_drain(app_name, body)
     post("/apps/#{app_name}/logplex/drains", body).to_s
   end
@@ -68,6 +72,10 @@ module Heroku::Command
 
     def enable
       puts heroku.enable_logplex(app)
+    end
+
+    def info
+      puts heroku.logplex_info(app)
     end
 
     def drain
