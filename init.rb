@@ -10,6 +10,8 @@ class Heroku::Client
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
+    http.read_timeout = 0
+
     begin
       http.start do
         http.request_get(uri.path) do |request|
