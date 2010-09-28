@@ -10,12 +10,16 @@ class Heroku::Client
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
-    http.start do
-      http.request_get(uri.path) do |request|
-        request.read_body do |chunk|
-          yield chunk
+    begin
+      http.start do
+        http.request_get(uri.path) do |request|
+          request.read_body do |chunk|
+            yield chunk
+          end
         end
       end
+    rescue Timeout::Error, EOFError
+      abort("\n !    Logplex request timed out")
     end
   end
 
