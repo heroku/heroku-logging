@@ -1,28 +1,32 @@
 class Heroku::Client
   def read_logs(app_name, options)
     query = "&" + options.join("&") unless options.empty?
-    url = get("/apps/#{app_name}/logs?logplex=true#{query}").to_s
-    uri  = URI.parse(url);
-    http = Net::HTTP.new(uri.host, uri.port)
+		begin
+    	url = get("/apps/#{app_name}/logs?logplex=true#{query}").to_s
+    	uri  = URI.parse(url);
+	    http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.scheme == 'https'
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
+	    if uri.scheme == 'https'
+	      http.use_ssl = true
+	      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	    end
 
-    http.read_timeout = 0
+	    http.read_timeout = 0
 
-    begin
-      http.start do
-        http.request_get(uri.path) do |request|
-          request.read_body do |chunk|
-            yield chunk
-          end
-        end
-      end
-    rescue Timeout::Error, EOFError
-      abort("\n !    Request timed out")
-    end
+	    begin
+	      http.start do
+	        http.request_get(uri.path) do |request|
+	          request.read_body do |chunk|
+	            yield chunk
+	          end
+	        end
+	      end
+	    rescue Timeout::Error, EOFError
+	      abort("\n !    Request timed out")
+	    end
+		rescue RestClient::RequestFailed => e
+			puts get("/apps/#{app_name}/logs").to_s
+		end
   end
 
   def log_info(app_name)
@@ -39,7 +43,7 @@ class Heroku::Client
 end
 
 module Heroku::Command
-  class Logging < BaseWithApp
+  class Logs < BaseWithApp
     Help.group("logs") do |group|
       group.command "logs [options]", "show logs"
       group.command "logs --tail",    "realtime tail of logs"

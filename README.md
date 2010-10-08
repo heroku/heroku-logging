@@ -1,17 +1,17 @@
-## Enable Logplex
-  heroku logplex:enable
+## Add addon
+  heroku addons:add logs:basic
   
-## Disable Logplex
-  heroku logplex:disable
+## Remove addon
+  heroku addons:remove logs:basic
 
 ## Fetch logs
-  heroku logplex
+  heroku logs
 
 ## Tail logs
-  heroku logplex --tail
+  heroku logs --tail
 
 ## Options
 
-  heroku logplex --num 100  
-  heroku logplex --ps dyno.1  
-  heroku logplex --source app  
+  heroku logs --num 100  
+  heroku logs --ps dyno.1  
+  heroku logs --source app  
