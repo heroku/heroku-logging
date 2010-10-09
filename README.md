@@ -1,8 +1,8 @@
 ## Add addon
-  heroku addons:add logs:basic
+  heroku addons:add logging:basic
   
 ## Remove addon
-  heroku addons:remove logs:basic
+  heroku addons:remove logging:basic
 
 ## Fetch logs
   heroku logs
