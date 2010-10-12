@@ -13,5 +13,5 @@
 ## Options
 
   heroku logs --num 100  
-  heroku logs --ps dyno.1  
+  heroku logs --ps web.1  
   heroku logs --source app  

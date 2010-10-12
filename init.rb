@@ -1,32 +1,32 @@
 class Heroku::Client
   def read_logs(app_name, options)
     query = "&" + options.join("&") unless options.empty?
-		begin
-    	url = get("/apps/#{app_name}/logs?logplex=true#{query}").to_s
-    	uri  = URI.parse(url);
-	    http = Net::HTTP.new(uri.host, uri.port)
+    url = get("/apps/#{app_name}/logs?logplex=true#{query}").to_s
+    if url == 'Use old logs'
+      puts get("/apps/#{app_name}/logs").to_s
+    else
+      uri  = URI.parse(url);
+      http = Net::HTTP.new(uri.host, uri.port)
 
-	    if uri.scheme == 'https'
-	      http.use_ssl = true
-	      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-	    end
+      if uri.scheme == 'https'
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
 
-	    http.read_timeout = 60 * 60 * 24
+      http.read_timeout = 60 * 60 * 24
 
-	    begin
-	      http.start do
-	        http.request_get(uri.path) do |request|
-	          request.read_body do |chunk|
-	            yield chunk
-	          end
-	        end
-	      end
-	    rescue Timeout::Error, EOFError
-	      abort("\n !    Request timed out")
-	    end
-		rescue RestClient::RequestFailed => e
-			puts get("/apps/#{app_name}/logs").to_s
-		end
+      begin
+        http.start do
+          http.request_get(uri.path) do |request|
+            request.read_body do |chunk|
+              yield chunk
+            end
+          end
+        end
+      rescue Timeout::Error, EOFError
+        abort("\n !    Request timed out")
+      end
+    end
   end
 
   def log_info(app_name)
