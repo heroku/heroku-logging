@@ -11,7 +11,7 @@ class Heroku::Client
 	      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 	    end
 
-	    http.read_timeout = 0
+	    http.read_timeout = 60 * 60 * 24
 
 	    begin
 	      http.start do
