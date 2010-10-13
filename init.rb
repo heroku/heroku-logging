@@ -33,12 +33,20 @@ class Heroku::Client
     get("/apps/#{app_name}/logs/info").to_s.gsub(/^\s*$/, '')
   end
 
-  def add_drain(app_name, body)
-    post("/apps/#{app_name}/logs/drains", body).to_s
+  def list_drains(app_name)
+    get("/apps/#{app_name}/logs/drains").to_s
   end
 
-  def remove_drain(app_name, drain_name)
-    delete("/apps/#{app_name}/logs/drains/#{drain_name}", {}).to_s
+  def add_drain(app_name, url)
+    post("/apps/#{app_name}/logs/drains", "url=#{url}").to_s
+  end
+
+  def remove_drain(app_name, url)
+    delete("/apps/#{app_name}/logs/drains?url=#{URI.escape(url)}").to_s
+  end
+
+  def clear_drains(app_name)
+    delete("/apps/#{app_name}/logs/drains", {}).to_s
   end
 end
 
@@ -70,33 +78,24 @@ module Heroku::Command
       puts heroku.log_info(app)
     end
 
+    def drains
+      case args.shift
+      when "clear"
+        puts heroku.clear_drains(app)
+        return
+      end
+      puts heroku.list_drains(app)
+    end
+
     def drain
       case args.shift
         when "add"
-          name = host = port = nil
-          until args.empty? do
-            case args.shift
-              when "-n", "--name" then name = URI.encode(args.shift)
-              when "-h", "--host" then host = URI.encode(args.shift)
-              when "-p", "--port" then port = args.shift.to_i
-              end
-          end
-          if name.nil? || host.nil? || port.nil?
-            puts "Usage:\theroku logs:drain add --name <name> --host <host> --port <port>"
-          else
-            puts heroku.add_drain(app, "name=#{name}&host=#{host}&port=#{port}")
-          end
+          url = args.shift unless args.empty?
+          puts heroku.add_drain(app, url)
           return
         when "remove"
-          until args.empty? do
-            case args.shift
-              when "-n", "--name"
-                name = URI.encode(args.shift)
-                puts heroku.remove_drain(app, name)
-                return
-              end
-          end
-          puts "Usage:\theroku logs:drain remove --name <name>"
+          url = args.shift unless args.empty?
+          puts heroku.remove_drain(app, url)
           return
       end
       puts "Unknown or malformed drain command"
