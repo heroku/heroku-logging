@@ -29,10 +29,6 @@ class Heroku::Client
     end
   end
 
-  def log_info(app_name)
-    get("/apps/#{app_name}/logs/info").to_s.gsub(/^\s*$/, '')
-  end
-
   def list_drains(app_name)
     get("/apps/#{app_name}/logs/drains").to_s
   end
@@ -52,11 +48,13 @@ end
 
 module Heroku::Command
   class Logs < BaseWithApp
-    Help.group("logs") do |group|
-      group.command "logs [options]", "show logs"
-      group.command "logs --tail",    "realtime tail of logs"
-      group.command "logs:drain add [options]", "add an instance that will receive log messages"
-      group.command "logs:drain remove [options]", "remove an instance"
+    Help.group("Logging") do |group|
+      group.command "logs",           "fetch recent logs"
+      group.command "logs --tail",    "realtime logs tail"
+      group.command "logs:drains",    "list syslog drains"
+      group.command "logs:drains add <url>",     "add a syslog drain"
+      group.command "logs:drains remove <url>",  "remove a syslog drain"
+      group.command "logs:drains clear",         "remove all syslog drains"
     end
 
     def index
@@ -74,32 +72,26 @@ module Heroku::Command
       end
     end
 
-    def info
-      puts heroku.log_info(app)
-    end
-
     def drains
-      case args.shift
-      when "clear"
-        puts heroku.clear_drains(app)
+      if args.empty?
+        puts heroku.list_drains(app)
         return
       end
-      puts heroku.list_drains(app)
-    end
 
-    def drain
       case args.shift
         when "add"
-          url = args.shift unless args.empty?
+          url = args.shift
           puts heroku.add_drain(app, url)
           return
         when "remove"
-          url = args.shift unless args.empty?
+          url = args.shift
           puts heroku.remove_drain(app, url)
           return
+        when "clear"
+          puts heroku.clear_drains(app)
+          return
       end
-      puts "Unknown or malformed drain command"
+      raise(CommandFailed, "usage: heroku logs:drains <add | remove | clear>")
     end
-
   end
 end
