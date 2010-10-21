@@ -58,6 +58,8 @@ module Heroku::Command
     end
 
     def index
+      init_colors
+
       options = []
       until args.empty? do
         case args.shift
@@ -68,7 +70,7 @@ module Heroku::Command
           end
       end
       heroku.read_logs(app, options) do |chk|
-        puts chk
+        display_with_colors chk
       end
     end
 
@@ -92,6 +94,39 @@ module Heroku::Command
           return
       end
       raise(CommandFailed, "usage: heroku logs:drains <add | remove | clear>")
+    end
+
+    def init_colors
+      require 'term/ansicolor'
+      @assigned_colors = {}
+
+      trap("INT") do
+        puts Term::ANSIColor.reset
+        exit
+      end
+    rescue LoadError
+    end
+
+    COLORS = %w( cyan yellow green magenta red )
+
+    def display_with_colors(log)
+      if !@assigned_colors
+        puts log
+        return
+      end
+
+      header, identifier, body = parse_log(log)
+      @assigned_colors[identifier] ||= COLORS[@assigned_colors.size % COLORS.size]
+      print Term::ANSIColor.send(@assigned_colors[identifier])
+      print header
+      print Term::ANSIColor.reset
+      print body
+      puts
+    end
+
+    def parse_log(log)
+      return unless parsed = log.match(/^(.*\[(\w+)([\d\.]+)?\]:)(.*)?$/)
+      [1, 2, 4].map { |i| parsed[i] }
     end
   end
 end
