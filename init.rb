@@ -110,6 +110,8 @@ module Heroku::Command
     COLORS = %w( cyan yellow green magenta red )
 
     def display_with_colors(log)
+      return if log.empty?
+
       if !@assigned_colors
         puts log
         return
