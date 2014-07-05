@@ -55,6 +55,7 @@ module Heroku::Command
       group.command "logs:drains add <url>",     "add a syslog drain"
       group.command "logs:drains remove <url>",  "remove a syslog drain"
       group.command "logs:drains clear",         "remove all syslog drains"
+      group.command "logs:drains list",          "list all syslog drains"
     end
 
     def index
@@ -97,8 +98,11 @@ module Heroku::Command
         when "clear"
           puts heroku.clear_drains(app)
           return
+        when "list"
+          puts heroku.list_drains(app)
+          return
       end
-      raise(CommandFailed, "usage: heroku logs:drains <add | remove | clear>")
+      raise(CommandFailed, "usage: heroku logs:drains <add | remove | clear | list>")
     end
 
     def init_colors(colorizer=nil)
